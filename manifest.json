@@ -1,8 +1,15 @@
-{ 
+{
   "manifest_version": 3,
-  "name": "HTTPS API Request Tracker",
+  "name": "API Request Tracker",
   "version": "1.0",
-  "description": "Tracks HTTPS API requests and logs them to the console.",
-  "permissions": [ "webRequest", "webRequestBlocking", "" ],
-  "background": { "service_worker": "background.js" }
+  "description": "Tracks API requests and logs them to the console.",
+  "permissions": [
+    "webRequest"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
 }
