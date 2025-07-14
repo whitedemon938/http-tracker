@@ -1,57 +1,42 @@
-let requests = [];
+let trackedRequests = [];
 
-chrome.webRequest.onBeforeRequest.addListener(
-  function(details) {
-    if (details.url.startsWith('https://')) {
-      const requestInfo = {
+// Track outgoing HTTPS requests with headers
+chrome.webRequest.onBeforeSendHeaders.addListener(
+  (details) => {
+    if (details.url.startsWith("https://")) {
+      trackedRequests.push({
         url: details.url,
         method: details.method,
-        type: details.type,
-        timestamp: new Date(details.timeStamp).toISOString()
-      };
-      console.log('API Request:', requestInfo);
-      requests.push(requestInfo);
-      if (requests.length > 100) requests.shift(); // Limit to 100 requests
-    }
-  },
-  { urls: ["<all_urls>"] },
-  ["requestBody"]
-);
+        time: new Date(details.timeStamp).toISOString(),
+        requestHeaders: details.requestHeaders
+      });
 
-chrome.webRequest.onBeforeSendHeaders.addListener(
-  function(details) {
-    if (details.url.startsWith('https://')) {
-      console.log('Request Headers:', details.requestHeaders);
-      const request = requests.find(req => req.url === details.url);
-      if (request) request.headers = details.requestHeaders;
+      if (trackedRequests.length > 100) trackedRequests.shift();
+
+      console.log("Tracked API Request:", details.url);
     }
   },
   { urls: ["<all_urls>"] },
   ["requestHeaders"]
 );
 
+// Track completed requests
 chrome.webRequest.onCompleted.addListener(
-  function(details) {
-    if (details.url.startsWith('https://')) {
-      console.log('Response Details:', {
-        url: details.url,
-        statusCode: details.statusCode,
-        responseHeaders: details.responseHeaders
-      });
-      const request = requests.find(req => req.url === details.url);
-      if (request) {
-        request.statusCode = details.statusCode;
-        request.responseHeaders = details.responseHeaders;
-      }
+  (details) => {
+    const req = trackedRequests.find((r) => r.url === details.url);
+    if (req) {
+      req.statusCode = details.statusCode;
+      req.responseHeaders = details.responseHeaders;
     }
+    console.log("API Request Completed:", details.url);
   },
   { urls: ["<all_urls>"] },
   ["responseHeaders"]
 );
 
-// Handle messages from popup
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'getRequests') {
-    sendResponse({ requests: requests });
+// Respond to popup requests
+chrome.runtime.onMessage.addListener((msg, sender, respond) => {
+  if (msg.type === "getRequests") {
+    respond({ trackedRequests });
   }
 });
