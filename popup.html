@@ -1,13 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>API Request Tracker</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>Tracked API Requests</title>
 </head>
 <body>
-  <h1>Tracked HTTPS API Requests</h1>
-  <div id="request-list"></div>
-  <script src="popup.js"></script>
+  <h1>Tracked Requests</h1>
+  <ul id="requestList"></ul>
+
+  <script>
+    chrome.runtime.sendMessage({ type: "getRequests" }, (response) => {
+      const list = document.getElementById("requestList");
+      response.trackedRequests.forEach(req => {
+        const li = document.createElement("li");
+        li.textContent = `${req.method} ${req.url}`;
+        list.appendChild(li);
+      });
+    });
+  </script>
 </body>
 </html>
