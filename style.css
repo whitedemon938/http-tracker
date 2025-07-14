@@ -1,0 +1,25 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 10px;
+  width: 300px;
+}
+
+h1 {
+  font-size: 16px;
+  text-align: center;
+}
+
+.request {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+}
+
+.request strong {
+  font-size: 14px;
+}
+
+p {
+  color: #888;
+}
